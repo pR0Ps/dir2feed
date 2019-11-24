@@ -33,9 +33,10 @@ Generate an Atom feed from the contents of a directory
 positional arguments:
   path                  The directory to process
   base_url              URL prefix for the top-level path
-  feed_url              URL that this feed will be accessed from (defaults to
-                        {base_url}/{output} if both are provided, otherwise is
-                        required)
+  feed_url              The URL that this feed will be accessed from. Not
+                        required, but is recommended. If provided, this will
+                        be used as the feed's ID, otherwise the base_url will
+                        be used.
 
 optional arguments:
   -h, --help            show this help message and exit

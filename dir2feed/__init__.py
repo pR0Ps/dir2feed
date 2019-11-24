@@ -87,9 +87,12 @@ class Entry:
 
 def gen_feed(title, base_url, feed_url, num_cutoff, entries):
     fg = FeedGenerator()
-    fg.id(feed_url)
+    if feed_url:
+        fg.id(feed_url)
+        fg.link(href=feed_url, rel="self")
+    else:
+        fg.id(base_url)
     fg.title(title)
-    fg.link(href=feed_url, rel="self")
     fg.generator(generator="dir2feed", uri="https://github.com/pR0Ps/dir2feed")
     all_entries = sorted(entries, key=attrgetter("date", "title"))
     for e in all_entries[-max(0, num_cutoff or 0) :]:
@@ -158,11 +161,8 @@ def dir2feed(
 ):
     base_url = base_url.rstrip("/")
     path = path.rstrip("/")
-    if not feed_url:
-        if output == "-":
-            raise ValueError("'feed_url' is required if outputting to stdout")
-        feed_url = base_url + "/" + output
-    feed_url = feed_url.rstrip("/")
+    if feed_url:
+        feed_url = feed_url.rstrip("/")
     if not title:
         title = os.path.basename(path)
 

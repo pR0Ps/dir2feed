@@ -16,8 +16,9 @@ def parse_args():
         "feed_url",
         nargs="?",
         help=(
-            "URL that this feed will be accessed from (defaults to "
-            "{base_url}/{output} if both are provided, otherwise is required)"
+            "The URL that this feed will be accessed from. "
+            "Not required, but is recommended. If provided, this will be used "
+            "as the feed's ID, otherwise the base_url will be used."
         ),
     )
     parser.add_argument(
