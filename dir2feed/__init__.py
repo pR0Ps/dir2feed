@@ -55,25 +55,35 @@ class Entry:
                 type=get_mimetype(self.url),
             )
 
-    def content(self):
-        def listobjs(s, objs, name):
-            if objs:
-                s.append("<p>{} {}(s):</p>".format(len(objs), name))
-                s.append("<ul>")
-                for o in objs:
-                    title = quote(o.name)
-                    url = "{}/{}".format(self.url, title)
-                    s.append('<li><a href="{}">{}</a></li>'.format(url, title))
-                s.append("</ul><br>")
+    def _listobjs(self, objs, name):
+        if objs:
+            yield "<p>{} {}(s):</p>".format(len(objs), name)
+            yield "<ul>"
+            for o in objs:
+                title = quote(o.name)
+                url = "{}/{}".format(self.url, title)
+                yield '<li><a href="{}">{}</a></li>'.format(url, title)
+            yield "</ul><br>"
 
+    def content(self):
         s = []
         if self.is_dir:
-            s.append("<p>Is a directory containing:</p>")
-            listobjs(s, self._dirs, "dir")
-            listobjs(s, self._files, "file")
+            s.append("<p>Directory name: {}</p>".format(quote(self.title)))
+            s.append("<p>This directory contains:</p>")
+            s.extend(self._listobjs(self._dirs, "dir"))
+            s.extend(self._listobjs(self._files, "file"))
         else:
-            s.append("<p>Is a file<p>")
+            s.append("<p>Filename: {}</p>".format(quote(self.title)))
+
+        dt_iso = self.date.isoformat()
+        dt_readable = self.date.strftime("%Y-%m-%d %H:%M UTC")
+        s.append(
+            '<p>Last modified: <time datetime="{}">{}</time></p>'.format(
+                dt_iso, dt_readable
+            )
+        )
         return "".join(s)
+
 
 def gen_feed(title, base_url, feed_url, num_cutoff, entries):
     fg = FeedGenerator()
