@@ -44,14 +44,14 @@ def parse_args():
     parser.add_argument(
         "--exclude",
         type=str,
-        default=None,
+        default=[],
         action="append",
         help="Files to exclude (can be provided multiple times)",
     )
     parser.add_argument(
         "--exclude-dir",
         type=str,
-        default=None,
+        default=[],
         action="append",
         help="Directories to exclude (can be provided multiple times)",
     )
