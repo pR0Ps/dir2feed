@@ -22,10 +22,10 @@ Usage
 -----
 ```
 $ dir2feed --help
-usage: dir2feed [-h] [--type {file,dir,both}] [--title TITLE] [--use-mtime]
-                [--depth DEPTH] [--exclude EXCLUDE]
-                [--exclude-dir EXCLUDE_DIR] [--age-cutoff AGE_CUTOFF]
-                [--num-cutoff NUM_CUTOFF] [--output OUTPUT]
+usage: dir2feed [-h] [--type {file,dir,both}] [--title TITLE] [--depth DEPTH]
+                [--exclude EXCLUDE] [--exclude-dir EXCLUDE_DIR]
+                [--age-cutoff AGE_CUTOFF] [--num-cutoff NUM_CUTOFF]
+                [--output OUTPUT]
                 path base_url [feed_url]
 
 Generate an Atom feed from the contents of a directory
@@ -44,7 +44,6 @@ optional arguments:
                         "file")
   --title TITLE         The title of the feed (default is to use the starting
                         directory name)
-  --use-mtime           Use the modified date instead of created date
   --depth DEPTH         The depth to recurse (default: 1)
   --exclude EXCLUDE     Files to exclude (can be provided multiple times)
   --exclude-dir EXCLUDE_DIR

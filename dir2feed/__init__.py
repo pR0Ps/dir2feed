@@ -17,7 +17,7 @@ def get_mimetype(url):
 
 
 class Entry:
-    def __init__(self, base_url, start_path, rel_path, mtime=False):
+    def __init__(self, base_url, start_path, rel_path):
         self.title = os.path.basename(rel_path)
         self.url = "{}/{}".format(base_url, rel_path)
         self.path = os.path.join(start_path, rel_path)
@@ -35,9 +35,9 @@ class Entry:
         else:
             self.size = stat.st_size
 
-        self.date = datetime.utcfromtimestamp(
-            int(stat.st_mtime if mtime else stat.st_ctime)
-        ).replace(tzinfo=timezone.utc)
+        self.date = datetime.utcfromtimestamp(stat.st_mtime).replace(
+            tzinfo=timezone.utc
+        )
 
         # Sort by reverse date (new -> old), then alphabetical
         self._sort_data = (DATETIME_MAX - self.date, self.title)
@@ -143,10 +143,10 @@ def gen_files(path, type_, depth, exclude, exclude_dir):
                 yield os.path.relpath(os.path.join(dirpath, f), start=path)
 
 
-def gen_entries(start_path, paths, base_url, age_cutoff, use_mtime):
+def gen_entries(start_path, paths, base_url, age_cutoff):
     now = datetime.utcnow().replace(tzinfo=timezone.utc)
     for p in paths:
-        e = Entry(base_url, start_path, p, use_mtime)
+        e = Entry(base_url, start_path, p)
         if age_cutoff and (now - e.date).days > age_cutoff:
             continue
         yield e
@@ -162,7 +162,6 @@ def dir2feed(
     depth=1,
     age_cutoff=30,
     num_cutoff=50,
-    use_mtime=False,
     exclude=[],
     exclude_dir=[],
 ):
@@ -183,7 +182,7 @@ def dir2feed(
     exclude_dir = [re.compile(fnmatch.translate(x)) for x in exclude_dir]
 
     paths = gen_files(path, type_, depth, exclude, exclude_dir)
-    entries = gen_entries(path, paths, base_url, age_cutoff, use_mtime)
+    entries = gen_entries(path, paths, base_url, age_cutoff)
     feed = gen_feed(title, base_url, feed_url, num_cutoff, entries)
     if output == "-":
         print(feed.atom_str(pretty=True).decode("utf-8"))

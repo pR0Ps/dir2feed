@@ -34,11 +34,6 @@ def parse_args():
         help="The title of the feed (default is to use the starting directory name)",
     )
     parser.add_argument(
-        "--use-mtime",
-        action="store_true",
-        help="Use the modified date instead of created date for entries",
-    )
-    parser.add_argument(
         "--depth", type=int, default=1, help="The depth to recurse (default: 1)"
     )
     parser.add_argument(
