@@ -2,14 +2,13 @@
 
 import os
 from datetime import datetime, timezone
-import mimetypes
 import fnmatch
+import mimetypes
+from operator import attrgetter
 import re
 from urllib.parse import quote
 
 from feedgen.feed import FeedGenerator
-
-DATETIME_MAX = datetime.max.replace(tzinfo=timezone.utc)
 
 
 def get_mimetype(url):
@@ -38,9 +37,6 @@ class Entry:
         self.date = datetime.utcfromtimestamp(stat.st_mtime).replace(
             tzinfo=timezone.utc
         )
-
-        # Sort by reverse date (new -> old), then alphabetical
-        self._sort_data = (DATETIME_MAX - self.date, self.title)
 
     def links(self):
         if self.is_dir:
@@ -79,29 +75,13 @@ class Entry:
             s.append("<p>Is a file<p>")
         return "".join(s)
 
-    def __lt__(self, other):
-        return self._sort_data < other._sort_data
-
-    def __le__(self, other):
-        return self._sort_data <= other._sort_data
-
-    def __eq__(self, other):
-        return self._sort_data == other._sort_data
-
-    def __ge__(self, other):
-        return self._sort_data >= other._sort_data
-
-    def __gt__(self, other):
-        return self._sort_data > other._sort_data
-
-
 def gen_feed(title, base_url, feed_url, num_cutoff, entries):
     fg = FeedGenerator()
     fg.id(feed_url)
     fg.title(title)
     fg.link(href=feed_url, rel="self")
     fg.generator(generator="dir2feed", uri="https://github.com/pR0Ps/dir2feed")
-    for i, e in enumerate(sorted(entries)):
+    for i, e in enumerate(sorted(entries, key=attrgetter("date", "title"))):
         if i >= num_cutoff:
             break
         fe = fg.add_entry()
