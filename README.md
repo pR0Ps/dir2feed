@@ -53,7 +53,8 @@ optional arguments:
                         Entries over this many days old are dropped (default
                         is no cutoff)
   --num-cutoff NUM_CUTOFF
-                        The maximum number of entries to generate (default 50)
+                        The maximum number of entries to generate (default 50,
+                        0 for no limit)
   --output OUTPUT       The file to write the results to (defaults to stdout)
 ```
 

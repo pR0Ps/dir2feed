@@ -81,9 +81,8 @@ def gen_feed(title, base_url, feed_url, num_cutoff, entries):
     fg.title(title)
     fg.link(href=feed_url, rel="self")
     fg.generator(generator="dir2feed", uri="https://github.com/pR0Ps/dir2feed")
-    for i, e in enumerate(sorted(entries, key=attrgetter("date", "title"))):
-        if i >= num_cutoff:
-            break
+    all_entries = sorted(entries, key=attrgetter("date", "title"))
+    for e in all_entries[-max(0, num_cutoff or 0) :]:
         fe = fg.add_entry()
         fe.id(e.url)
         fe.title(e.title)

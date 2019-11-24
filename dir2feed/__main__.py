@@ -60,7 +60,7 @@ def parse_args():
         "--num-cutoff",
         type=int,
         default=50,
-        help="The maximum number of entries to generate (default 50)",
+        help="The maximum number of entries to generate (default 50, 0 for no limit)",
     )
     parser.add_argument(
         "--output",
