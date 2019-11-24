@@ -65,7 +65,7 @@ class Entry:
                 yield '<li><a href="{}">{}</a></li>'.format(url, title)
             yield "</ul><br>"
 
-    def content(self):
+    def summary(self):
         s = []
         if self.is_dir:
             s.append("<p>Directory name: {}</p>".format(quote(self.title)))
@@ -100,7 +100,9 @@ def gen_feed(title, base_url, feed_url, num_cutoff, entries):
         fe.updated(e.date)
         for l in e.links():
             fe.link(**l)
-        fe.content(content=e.content(), type="html")
+        # KLUDGE: Set the content instead of the summary because the feed generation
+        #         library currently doesn't support HTML-based summaries
+        fe.content(content=e.summary(), type="html")
 
     return fg
 
