@@ -3,10 +3,11 @@
 import os
 from datetime import datetime, timezone
 import fnmatch
+from html import escape as html_escape
 import mimetypes
 from operator import attrgetter
 import re
-from urllib.parse import quote
+from urllib.parse import quote as url_escape
 
 from feedgen.feed import FeedGenerator
 
@@ -18,7 +19,7 @@ def get_mimetype(url):
 class Entry:
     def __init__(self, base_url, start_path, rel_path):
         self.title = os.path.basename(rel_path)
-        self.url = "{}/{}".format(base_url, rel_path)
+        self.url = "{}/{}".format(base_url, url_escape(rel_path))
         self.path = os.path.join(start_path, rel_path)
 
         self.is_dir = os.path.isdir(self.path)
@@ -43,7 +44,7 @@ class Entry:
             for f in self._files:
                 yield dict(
                     rel="enclosure",
-                    href="{}/{}".format(self.url, quote(f.name)),
+                    href="{}/{}".format(self.url, url_escape(f.name)),
                     length=str(f.stat().st_size),
                     type=get_mimetype(f.name),
                 )
@@ -60,20 +61,20 @@ class Entry:
             yield "<p>{} {}(s):</p>".format(len(objs), name)
             yield "<ul>"
             for o in objs:
-                title = quote(o.name)
-                url = "{}/{}".format(self.url, title)
+                title = html_escape(o.name)
+                url = html_escape("{}/{}".format(self.url, url_escape(o.name)))
                 yield '<li><a href="{}">{}</a></li>'.format(url, title)
-            yield "</ul><br>"
+            yield "</ul><br/>"
 
     def summary(self):
         s = []
         if self.is_dir:
-            s.append("<p>Directory name: {}</p>".format(quote(self.title)))
+            s.append("<p>Directory name: {}</p>".format(html_escape(self.title)))
             s.append("<p>This directory contains:</p>")
             s.extend(self._listobjs(self._dirs, "dir"))
             s.extend(self._listobjs(self._files, "file"))
         else:
-            s.append("<p>Filename: {}</p>".format(quote(self.title)))
+            s.append("<p>Filename: {}</p>".format(html_escape(self.title)))
 
         dt_iso = self.date.isoformat()
         dt_readable = self.date.strftime("%Y-%m-%d %H:%M UTC")
