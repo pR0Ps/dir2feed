@@ -60,7 +60,7 @@ class Entry:
         if objs:
             yield "<p>{} {}(s):</p>".format(len(objs), name)
             yield "<ul>"
-            for o in objs:
+            for o in sorted(objs, key=attrgetter("name")):
                 title = html_escape(o.name)
                 url = html_escape("{}/{}".format(self.url, url_escape(o.name)))
                 yield '<li><a href="{}">{}</a></li>'.format(url, title)
