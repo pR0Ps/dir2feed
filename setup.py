@@ -11,8 +11,10 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ],
     packages=["dir2feed"],
-    install_requires=["feedgen>=0.8.0,<1.0.0"],
+    install_requires=["feedgen>=0.9.0,<1.0.0"],
     entry_points={"console_scripts": ["dir2feed=dir2feed.__main__:main"]},
 )

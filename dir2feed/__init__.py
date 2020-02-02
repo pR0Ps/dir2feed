@@ -104,9 +104,7 @@ def gen_feed(title, base_url, feed_url, num_cutoff, entries):
         fe.updated(e.date)
         for l in e.links():
             fe.link(**l)
-        # KLUDGE: Set the content instead of the summary because the feed generation
-        #         library currently doesn't support HTML-based summaries
-        fe.content(content=e.summary(), type="html")
+        fe.summary(summary=e.summary(), type="html")
 
     return fg
 
