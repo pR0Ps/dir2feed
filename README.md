@@ -45,7 +45,7 @@ optional arguments:
                         "file")
   --title TITLE         The title of the feed (default is to use the starting
                         directory name)
-  --depth DEPTH         The depth to recurse (default: 1)
+  --depth DEPTH         The depth to recurse (0 for unlimited, default is 1)
   --exclude EXCLUDE     Files to exclude (can be provided multiple times)
   --exclude-dir EXCLUDE_DIR
                         Directories to exclude (can be provided multiple

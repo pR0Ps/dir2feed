@@ -113,13 +113,14 @@ def gen_files(path, type_, depth, exclude, exclude_dir):
     for dirpath, dirs, files in os.walk(path, topdown=True, followlinks=True):
 
         # Stop recursing if we've met the max depth
-        relpath = os.path.relpath(dirpath, path)
-        curr_depth = relpath.count(os.path.sep)
-        if relpath == ".":
-            curr_depth -= 1
-        if curr_depth >= depth - 1:
-            del dirs[:]
-            continue
+        if depth:
+            relpath = os.path.relpath(dirpath, path)
+            curr_depth = relpath.count(os.path.sep)
+            if relpath == ".":
+                curr_depth -= 1
+            if curr_depth >= depth - 1:
+                del dirs[:]
+                continue
 
         # Ignore hidden folders (don't recurse into them)
         if dirs:
