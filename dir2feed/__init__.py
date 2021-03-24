@@ -109,32 +109,100 @@ def gen_feed(title, base_url, feed_url, num_cutoff, entries):
     return fg
 
 
-def gen_files(path, type_, depth, exclude, exclude_dir):
-    for dirpath, dirs, files in os.walk(path, topdown=True, followlinks=True):
+def custom_walk(top, max_depth=0, valid_entry=None, _depth=0):
+    """
+    Custom reimplementation of os.walk
 
-        # Stop recursing if we've met the max depth
-        if depth:
-            relpath = os.path.relpath(dirpath, path)
-            curr_depth = relpath.count(os.path.sep)
-            if relpath == ".":
-                curr_depth -= 1
-            if curr_depth >= depth - 1:
-                del dirs[:]
+     - Yields entries depth-first
+     - Only yields directories that are accessible and non-empty
+     - Allows only walking to a max depth
+     - Uses a validator function to filter what is explored/returned
+     - Ignores any errors encountered when accessing the files
+     - Returns True if the dir is accessible and non-empty, False otherwise
+    """
+
+    dirs = []
+    nondirs = []
+
+    try:
+        scandir_it = os.scandir(top)
+    except OSError:
+        return False
+
+    if max_depth and _depth >= max_depth:
+        # Past the max depth - check if it's empty without yielding the contents
+        try:
+            next(scandir_it)
+        except (StopIteration, OSError):
+            return False
+        return True
+
+    with scandir_it:
+        while True:
+            try:
+                entry = next(scandir_it)
+            except StopIteration:
+                break
+            except OSError:
+                return False
+
+            try:
+                is_dir = entry.is_dir()
+            except OSError:
+                is_dir = False
+
+            if valid_entry and not valid_entry(entry, is_dir):
                 continue
 
-        # Ignore hidden folders (don't recurse into them)
-        if dirs:
-            dirs[:] = [d for d in dirs if not any(e.match(d) for e in exclude_dir)]
+            if is_dir:
+                dirs.append(entry)
+            else:
+                nondirs.append(entry.name)
+
+    # Recurse into sub-directories
+    non_empty_dirs = []
+    for entry in dirs:
+        if (yield from custom_walk(entry.path, max_depth, valid_entry, _depth=_depth+1)):
+            non_empty_dirs.append(entry.name)
+
+    if non_empty_dirs or nondirs:
+        yield top, non_empty_dirs, nondirs
+        return True
+
+    return False
+
+
+def gen_paths(path, type_, max_depth, exclude, exclude_dir):
+
+    def valid_entry(entry, is_dir):
+        if is_dir and any(e.match(entry.name) for e in exclude_dir):
+            return False
+        elif not is_dir and any(e.match(entry.name) for e in exclude):
+            return False
+
+        return True
+
+    # Store directories that have been explored
+    processed = set()
+
+    for dirpath, dirs, files in custom_walk(os.fspath(path), max_depth, valid_entry):
+        relpath = os.path.relpath(dirpath, path)
 
         if type_ in ("dir", "both"):
             for d in dirs:
-                yield os.path.relpath(os.path.join(dirpath, d), start=path)
+                # Only yield the directory if it hasn't alrady been explored.
+                # Since custom_walk is depth-first, this means that only the bottom-level
+                # directories will be yielded
+                p = os.path.join(dirpath, d)
+                if p in processed:
+                    continue
+                yield os.path.relpath(p, start=path)
 
         if type_ in ("file", "both"):
             for f in files:
-                if any(e.match(f) for e in exclude):
-                    continue
                 yield os.path.relpath(os.path.join(dirpath, f), start=path)
+
+        processed.add(dirpath)
 
 
 def gen_entries(start_path, paths, base_url, age_cutoff):
@@ -172,7 +240,7 @@ def dir2feed(
     exclude = [re.compile(fnmatch.translate(x)) for x in exclude]
     exclude_dir = [re.compile(fnmatch.translate(x)) for x in exclude_dir]
 
-    paths = gen_files(path, type_, depth, exclude, exclude_dir)
+    paths = gen_paths(path, type_, depth, exclude, exclude_dir)
     entries = gen_entries(path, paths, base_url, age_cutoff)
     feed = gen_feed(title, base_url, feed_url, num_cutoff, entries)
     if output == "-":
